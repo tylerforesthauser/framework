@@ -32,10 +32,10 @@
   "dependencies": {
     "@nuxt/devalue": "^2.0.0",
     "@nuxt/kit": "^3.0.0-rc.6",
-    "@nuxt/schema": "https://github.com/tylerforesthauser/framework/raw/fix-vite/packages/vite/nuxt-vite-builder-3.0.0-rc.6.tgz",
+    "@nuxt/schema": "^3.0.0-rc.6",
     "@nuxt/telemetry": "^2.1.3",
     "@nuxt/ui-templates": "^0.3.0",
-    "@nuxt/vite-builder": "^3.0.0-rc.6",
+    "@nuxt/vite-builder": "https://github.com/tylerforesthauser/framework/raw/fix-vite/packages/vite/nuxt-vite-builder-3.0.0-rc.6.tgz",
     "@vue/reactivity": "^3.2.37",
     "@vue/shared": "^3.2.37",
     "@vueuse/head": "^0.7.6",
