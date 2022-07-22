@@ -21,60 +21,63 @@ export async function buildClient (ctx: ViteBuildContext) {
     port: hmrPortDefault,
     ports: Array.from({ length: 20 }, (_, i) => hmrPortDefault + 1 + i)
   })
-  const clientConfig: vite.InlineConfig = vite.mergeConfig(ctx.config, {
-    experimental: {
-      renderBuiltUrl: (filename, { type, hostType }) => {
-        if (hostType !== 'js' || type === 'asset') {
-          // In CSS we only use relative paths until we craft a clever runtime CSS hack
-          return { relative: true }
-        }
-        return { runtime: `globalThis.__publicAssetsURL(${JSON.stringify(filename)})` }
-      }
-    },
-    define: {
-      'process.server': false,
-      'process.client': true,
-      'module.hot': false
-    },
-    resolve: {
-      alias: {
-        '#build/plugins': resolve(ctx.nuxt.options.buildDir, 'plugins/client'),
-        '#internal/nitro': resolve(ctx.nuxt.options.buildDir, 'nitro.client.mjs')
-      }
-    },
-    build: {
-      rollupOptions: {
-        output: {
-          // https://github.com/vitejs/vite/tree/main/packages/vite/src/node/build.ts#L464-L478
-          assetFileNames: ctx.nuxt.options.dev ? undefined : withoutLeadingSlash(join(ctx.nuxt.options.app.buildAssetsDir, '[name].[hash].[ext]')),
-          chunkFileNames: ctx.nuxt.options.dev ? undefined : withoutLeadingSlash(join(ctx.nuxt.options.app.buildAssetsDir, '[name].[hash].mjs')),
-          entryFileNames: ctx.nuxt.options.dev ? 'entry.mjs' : withoutLeadingSlash(join(ctx.nuxt.options.app.buildAssetsDir, '[name].[hash].mjs'))
+  const clientConfig: vite.InlineConfig = vite.mergeConfig(
+    {
+      experimental: {
+        renderBuiltUrl: (filename, { type, hostType }) => {
+          if (hostType !== 'js' || type === 'asset') {
+            // In CSS we only use relative paths until we craft a clever runtime CSS hack
+            return { relative: true }
+          }
+          return { runtime: `globalThis.__publicAssetsURL(${JSON.stringify(filename)})` }
         }
       },
-      manifest: true,
-      outDir: resolve(ctx.nuxt.options.buildDir, 'dist/client')
-    },
-    plugins: [
-      cacheDirPlugin(ctx.nuxt.options.rootDir, 'client'),
-      vuePlugin(ctx.config.vue),
-      viteJsxPlugin(),
-      devStyleSSRPlugin({
-        rootDir: ctx.nuxt.options.rootDir,
-        buildAssetsURL: joinURL(ctx.nuxt.options.app.baseURL, ctx.nuxt.options.app.buildAssetsDir)
-      }),
-      viteNodePlugin(ctx)
-    ],
-    appType: 'custom',
-    server: {
-      hmr: {
-        // https://github.com/nuxt/framework/issues/4191
-        protocol: 'ws',
-        clientPort: hmrPort,
-        port: hmrPort
+      define: {
+        'process.server': false,
+        'process.client': true,
+        'module.hot': false
       },
-      middlewareMode: true
-    }
-  } as ViteOptions)
+      resolve: {
+        alias: {
+          '#build/plugins': resolve(ctx.nuxt.options.buildDir, 'plugins/client'),
+          '#internal/nitro': resolve(ctx.nuxt.options.buildDir, 'nitro.client.mjs')
+        }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            // https://github.com/vitejs/vite/tree/main/packages/vite/src/node/build.ts#L464-L478
+            assetFileNames: ctx.nuxt.options.dev ? undefined : withoutLeadingSlash(join(ctx.nuxt.options.app.buildAssetsDir, '[name].[hash].[ext]')),
+            chunkFileNames: ctx.nuxt.options.dev ? undefined : withoutLeadingSlash(join(ctx.nuxt.options.app.buildAssetsDir, '[name].[hash].mjs')),
+            entryFileNames: ctx.nuxt.options.dev ? 'entry.mjs' : withoutLeadingSlash(join(ctx.nuxt.options.app.buildAssetsDir, '[name].[hash].mjs'))
+          }
+        },
+        manifest: true,
+        outDir: resolve(ctx.nuxt.options.buildDir, 'dist/client')
+      },
+      plugins: [
+        cacheDirPlugin(ctx.nuxt.options.rootDir, 'client'),
+        vuePlugin(ctx.config.vue),
+        viteJsxPlugin(),
+        devStyleSSRPlugin({
+          rootDir: ctx.nuxt.options.rootDir,
+          buildAssetsURL: joinURL(ctx.nuxt.options.app.baseURL, ctx.nuxt.options.app.buildAssetsDir)
+        }),
+        viteNodePlugin(ctx)
+      ],
+      appType: 'custom',
+      server: {
+        hmr: {
+          // https://github.com/nuxt/framework/issues/4191
+          protocol: 'ws',
+          clientPort: hmrPort,
+          port: hmrPort
+        },
+        middlewareMode: true
+      }
+    } as ViteOptions,
+    ctx.config
+  )
 
   // In build mode we explicitly override any vite options that vite is relying on
   // to detect whether to inject production or development code (such as HMR code)
